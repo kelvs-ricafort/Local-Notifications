@@ -1,4 +1,8 @@
 <resources>
-    <string name="app_name">Periodic Notifications</string>
+    <string name="app_name">Notification Procedures</string>
+    <string name="big_text">Hello everyone. I want to give you some tips and tricks about being an android developer
+        and developing good android applications in this article. These are tips and tricks from my experiences.
+        I want to share my experience of being an android developer with you. I hope, it helps you.</string>
+
     <string name="notifications">Notifications</string>
 </resources>
