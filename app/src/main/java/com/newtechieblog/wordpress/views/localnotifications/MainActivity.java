@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent actionPending = PendingIntent.getBroadcast(MainActivity.this, 1, actionIntent, PendingIntent.FLAG_IMMUTABLE);
 
         // Dismiss Button
-        Intent dismissIntent = new Intent(MainActivity.this, Receiver.class);
+        Intent dismissIntent = new Intent(MainActivity.this, ReceiverDismiss.class);
         PendingIntent dismissPending = PendingIntent.getBroadcast(MainActivity.this, 2, dismissIntent, PendingIntent.FLAG_IMMUTABLE);
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.android);
@@ -91,8 +91,8 @@ public class MainActivity extends AppCompatActivity {
                 .addAction(R.drawable.notification_icon,"Toast Message",actionPending)
                 .addAction(R.drawable.notification_icon,"Dismiss",dismissPending)
                 .setLargeIcon(bitmap)
-                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null));
-                 //.setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text));
 
         compat = NotificationManagerCompat.from(MainActivity.this);
 
