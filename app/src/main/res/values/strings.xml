@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Local Notifications</string>
+    <string name="app_name">Periodic Notifications</string>
     <string name="notifications">Notifications</string>
 </resources>

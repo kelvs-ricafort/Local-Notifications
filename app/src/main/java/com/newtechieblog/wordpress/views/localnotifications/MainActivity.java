@@ -10,9 +10,12 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,18 +23,14 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
-
     Button btnNotifications;
     ConstraintLayout constraintLayout;
-
-    public final static String CHANNEL_ID = "1";
-    public final static String CHANNEL_NAME = "Counter Notification";
-    private final static int NOTIFICATION_ID = 1;
-    int counter = 0;
-    NotificationCompat.Builder builder;
-    NotificationManagerCompat compat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,53 +40,54 @@ public class MainActivity extends AppCompatActivity {
        btnNotifications = findViewById(R.id.btnNotifications);
        constraintLayout = findViewById(R.id.constraintLayout);
 
-       btnNotifications.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               counter++;
-               btnNotifications.setText(String.valueOf(counter));
-
-               if (counter == 5) {
-                   sendNotifications();
+       btnNotifications.setOnClickListener(v -> {
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+               if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                   if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                       Snackbar.make(constraintLayout,
+                               "Please allow the permission to take notification",
+                               Snackbar.LENGTH_LONG).setAction("Allow", v1 -> {
+                                   ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+                               }).show();
+                   } else {
+                       ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+                   }
+               } else {
+                   setNotificationTime();
                }
+           } else {
+               setNotificationTime();
            }
        });
     }
+    public void setNotificationTime() {
+        Calendar calendar = Calendar.getInstance();
+        int currentHour = calendar.get(Calendar.HOUR);
+        int currentMinute = calendar.get(Calendar.MINUTE);
 
-    public void sendNotifications() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            manager.createNotificationChannel(channel);
-        }
+        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(currentHour)
+                .setMinute(currentMinute)
+                .setTitleText("Set Notification Time")
+                .build();
+        timePicker.show(getSupportFragmentManager(), "1");
 
-        builder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
-                .setContentTitle("Notification Title")
-                .setContentText("Notification Text")
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+        timePicker.addOnPositiveButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calendar.set(Calendar.HOUR_OF_DAY, 8);
+                calendar.set(Calendar.MINUTE, 14);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
 
-        compat = NotificationManagerCompat.from(MainActivity.this);
+                Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                    Snackbar.make(constraintLayout, "Please allow the permission to take notification",
-                            Snackbar.LENGTH_LONG).setAction("Allow", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
-                        }
-                    }).show();
-                } else {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
-                }
-            } else {
-                compat.notify(NOTIFICATION_ID, builder.build());
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
             }
-        } else {
-            compat.notify(NOTIFICATION_ID, builder.build());
-        }
+        });
     }
 
     @SuppressLint("MissingPermission")
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            compat.notify(NOTIFICATION_ID, builder.build());
+            setNotificationTime();
         } else {
             Snackbar.make(constraintLayout, "Please allow the permission to take notification",
                     Snackbar.LENGTH_LONG).setAction("Allow", new View.OnClickListener() {
