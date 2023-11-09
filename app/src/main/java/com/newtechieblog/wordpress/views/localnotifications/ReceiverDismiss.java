@@ -10,6 +10,6 @@ public class ReceiverDismiss extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         NotificationManagerCompat compat = NotificationManagerCompat.from(context);
-        compat.cancel(1);
+        compat.cancel(2);
     }
 }

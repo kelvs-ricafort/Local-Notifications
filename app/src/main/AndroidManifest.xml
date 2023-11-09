@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <receiver android:name=".Receiver" />
+        <receiver android:name=".ReceiverDismiss" />
     </application>
 
 </manifest>
