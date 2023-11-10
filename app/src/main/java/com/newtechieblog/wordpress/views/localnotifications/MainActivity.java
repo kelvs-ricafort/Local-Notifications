@@ -35,10 +35,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnNotifications;
     ConstraintLayout constraintLayout;
     int counter = 0;
-
     NotificationCompat.Builder builder;
     NotificationManagerCompat compat;
-
     private final static String CHANNEL_ID = "1";
     private final static String CHANNEL_NAME = "Notification Procedures";
     private final static int NOTIFICATION_ID = 1;
@@ -60,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             }
        });
     }
+
     public void sendNotification() {
        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
@@ -97,21 +96,17 @@ public class MainActivity extends AppCompatActivity {
         compat = NotificationManagerCompat.from(MainActivity.this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
             if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
-
                     Snackbar.make(
                             constraintLayout,
                             "Please allow the permission to take notification",
-                            Snackbar.LENGTH_LONG
-                    ).setAction("Allow", new View.OnClickListener() {
+                            Snackbar.LENGTH_LONG).setAction("Allow", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.POST_NOTIFICATIONS},3);
                         }
                     }).show();
-
                 } else {
                     ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.POST_NOTIFICATIONS},3);
                 }
